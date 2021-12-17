@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Pedal Details</h1>
+
+<div class="card">
+  <div class="card-content blue-grey darken-1  white-text ">
+    <span class="card-title z-depth-5">{{ pedal.name }}</span>
+    <p>Brand: {{ pedal.brand }}</p>
+    <p>Description: {{ pedal.description }}</p>
+    {% if pedal.year > 2018 %}
+        <p>Year: {{ pedal.year }}</p>
+    {% else %}
+         <p>Year: {{ pedal.year }} Still Working Great!</p>
+    {% endif %}
+  </div>
+  <div class="card-action blue-grey darken-3">
+    <a href="{% url 'pedals_update' pedal.id %}">Edit</a>
+    <a href="{% url 'pedals_delete' pedal.id %}">Delete</a>
+  </div>
+</div>
+
+<div class="col s6">
+
+    <!-- new code below -->
+  <form action="{% url 'add_checked' pedal.id %}" method="post">
+    {% csrf_token %}
+    {{ checked_form.as_p }}
+    <input type="submit" class="btn blue-grey darken-1 blue-grey darken-1" value="Add Checked">
+  </form>
+  <!-- new code above -->
+
+  <br>
+    {% if pedal.che_for_today %}
+      <div class="card-panel purple-text center-align">{{pedal.name}} has been checked all setups for today</div>
+    {% else %}
+      <div class="card-panel red-text center-align">{{pedal.name}} might need to be checked</div>
+    {% endif %}
+
+    <table class="striped">
+      <thead>
+        <tr><th>Date</th><th>Setup</th></tr>
+      </thead>
+      <tbody>
+        {% for checked in pedal.checked_set.all %}
+          <tr>
+            <td>{{checked.date}}</td>
+            <td>{{checked.get_setup_display}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr>
+<div class="row">
+    <div class="col s6">
+        <h3>{{ pedal.name }}'s Guitars</h3>
+        {% if pedal.guitars.count %}
+        {% for guitar in pedal.guitars.all %}
+            <div class="card">
+              <div class="card-content">
+                 <span class="card-title">
+                 A <span>{{ guitar.name }}<br>{{ guitar.description }}</span>
+              </div>
+
+              <!-- delete guitar session  -->
+              <div class="card-action">
+                <form action="{% url 'unassoc_guitar' pedal.id guitar.id %}" method="post">
+                    {% csrf_token %}
+                  <button type="submit" class="btn blue-grey darken-1">Remove</button>
+                </form>
+              </div>
+              <!-- delete guitar session -->
+
+            </div>
+        {% endfor %}
+        {% else %}
+        <h5>No Guitars :(</h5>
+        {% endif %}
+    </div>
+  <!-- Available toys will come after this line -->
+</div>
+<div class="col s6">
+    <h3>Available Guitars</h3>
+    {% if guitars.count %}
+      {% for guitar in guitars.all %}
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">
+                A <span>{{ guitar.name }}<br>{{ guitar.description }}</span>
+            </span>
+          </div>
+          <div class="card-action">
+            <form action="{% url 'assoc_guitar' pedal.id guitar.id %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn blue-grey darken-1">Add</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <h5>{{pedal.name}} Already Has All Guitars Available</h5>
+    {% endif %}
+</div>
+
+<script>
+    let dateEl = document.getElementById('id_date');
+    M.Datepicker.init(dateEl, {
+        format: 'yyyy-mm-dd',
+        defaultDate: new Date(),
+        setDefaultDate: true,
+        autoClose: true
+    });
+    let selectEl = document.getElementById('id_setup');
+    M.FormSelect.init(selectEl);
+
+</script>
+
+{% endblock %}

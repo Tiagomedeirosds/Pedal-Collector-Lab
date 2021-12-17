@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Pedal List</h1>
+
+{% for pedal in pedals %}
+    <div class="col s3">
+        <div class="card">
+                <a href="{% url 'detail' pedal.id %}"> 
+                    <div class="card-content">
+                    <span class="card-title">{{ pedal.name }}</span>
+                    <p>Breed: {{ pedal.brand }}</p>
+                    <p>Description: {{ pedal.description }}</p>
+                    {% if pedal.year > 2018 %}
+                        <p>Year: {{ pedal.year }}</p>
+                    {% else %}
+                        <p>Year: {{ pedal.year }} Still Working Great!</p>
+                    {% endif %}
+                    </div>
+                </a>     
+        </div>
+    </div>    
+{% endfor %}
+
+{% endblock %}
